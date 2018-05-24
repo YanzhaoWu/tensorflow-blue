@@ -16,6 +16,9 @@ limitations under the License.
 #include "tensorflow/core/lib/io/record_reader.h"
 
 #include <limits.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <iostream>
 
 #include "tensorflow/core/lib/core/coding.h"
 #include "tensorflow/core/lib/core/errors.h"
@@ -24,6 +27,7 @@ limitations under the License.
 #include "tensorflow/core/lib/io/compression.h"
 #include "tensorflow/core/lib/io/random_inputstream.h"
 #include "tensorflow/core/platform/env.h"
+#include "tensorflow/core/platform/logging.h"
 
 namespace tensorflow {
 namespace io {
@@ -90,7 +94,10 @@ Status RecordReader::ReadChecksummed(uint64 offset, size_t n, string* result) {
   }
 
   const size_t expected = n + sizeof(uint32);
+  int _id = getpid();
+  LOG(INFO) << "Start to Read data pid: " << std::endl;
   TF_RETURN_IF_ERROR(input_stream_->ReadNBytes(expected, result));
+  LOG(INFO) << "Finish reading data " << expected << " bytes, pid:" << _id << std::endl;
 
   if (result->size() != expected) {
     if (result->empty()) {
