@@ -95,9 +95,9 @@ Status RecordReader::ReadChecksummed(uint64 offset, size_t n, string* result) {
 
   const size_t expected = n + sizeof(uint32);
   int _id = getpid();
-  LOG(INFO) << "Start to Read data pid: " << std::endl;
+  LOG(INFO) << "Start to Read data " << n << " bytes, pid: " << _id << std::endl;
   TF_RETURN_IF_ERROR(input_stream_->ReadNBytes(expected, result));
-  LOG(INFO) << "Finish reading data " << expected << " bytes, pid:" << _id << std::endl;
+  LOG(INFO) << "Finish reading data " << n << " bytes, pid:" << _id << std::endl;
 
   if (result->size() != expected) {
     if (result->empty()) {
