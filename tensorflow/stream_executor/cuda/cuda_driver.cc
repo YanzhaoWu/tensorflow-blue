@@ -1142,6 +1142,8 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
                                                            CUdeviceptr gpu_src,
                                                            uint64 size) {
   ScopedActivateContext activation(context);
+  LOG(INFO) << "start sync memcpy'd d2h of " << size << " bytes to "
+            << host_dst;
   CUresult res = cuMemcpyDtoH(host_dst, gpu_src, size);
   if (res != CUDA_SUCCESS) {
     return port::InternalError(
@@ -1152,6 +1154,8 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
   }
   VLOG(2) << "successfully sync memcpy'd d2h of " << size << " bytes to "
           << host_dst;
+  LOG(INFO) << "successfully sync memcpy'd d2h of " << size << " bytes to "
+          << host_dst;
   return port::Status::OK();
 }
 
@@ -1160,6 +1164,7 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
                                                            const void *host_src,
                                                            uint64 size) {
   ScopedActivateContext activation(context);
+  LOG(INFO) << "start enqueued sync memcpy h2d of " << size << " bytes";
   CUresult res = cuMemcpyHtoD(gpu_dst, host_src, size);
   if (res != CUDA_SUCCESS) {
     return port::InternalError(port::Printf(
@@ -1169,6 +1174,7 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
         size));
   }
   VLOG(2) << "successfully enqueued sync memcpy h2d of " << size << " bytes";
+  LOG(INFO) << "successfully enqueued sync memcpy h2d of " << size << " bytes";
   return port::Status::OK();
 }
 
@@ -1177,6 +1183,7 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
                                                            CUdeviceptr gpu_src,
                                                            uint64 size) {
   ScopedActivateContext activation(context);
+  LOG(INFO) << "successfully sync memcpy'd d2d of " << size << " bytes";
   CUresult res = cuMemcpyDtoD(gpu_dst, gpu_src, size);
   if (res != CUDA_SUCCESS) {
     return port::InternalError(port::Printf(
@@ -1186,6 +1193,7 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
         port::bit_cast<void *>(gpu_src), size, size));
   }
   VLOG(2) << "successfully sync memcpy'd d2d of " << size << " bytes";
+  LOG(INFO) << "successfully sync memcpy'd d2d of " << size << " bytes";
   return port::Status::OK();
 }
 
@@ -1195,6 +1203,10 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
                                                     uint64 size,
                                                     CUstream stream) {
   ScopedActivateContext activation(context);
+  LOG(INFO) << "start enqueued async memcpy d2h of " << size
+            << " bytes from " << port::bit_cast<void *>(gpu_src) << " to " << host_dst
+            << " on stream " << stream;
+
   CUresult res = cuMemcpyDtoHAsync(host_dst, gpu_src, size, stream);
   if (res != CUDA_SUCCESS) {
     LOG(ERROR) << port::Printf(
@@ -1206,6 +1218,11 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
   VLOG(2) << "successfully enqueued async memcpy d2h of " << size
           << " bytes from " << port::bit_cast<void *>(gpu_src) << " to " << host_dst
           << " on stream " << stream;
+
+  LOG(INFO) << "successfully enqueued async memcpy d2h of " << size
+            << " bytes from " << port::bit_cast<void *>(gpu_src) << " to " << host_dst
+            << " on stream " << stream;
+
   return true;
 }
 
@@ -1215,6 +1232,9 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
                                                     uint64 size,
                                                     CUstream stream) {
   ScopedActivateContext activation(context);
+  LOG(INFO) << "start enqueued async memcpy h2d of " << size << " bytes"
+              << " on stream " << stream;
+
   CUresult res = cuMemcpyHtoDAsync(gpu_dst, host_src, size, stream);
   if (res != CUDA_SUCCESS) {
     LOG(ERROR) << port::Printf(
@@ -1225,6 +1245,9 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
   }
   VLOG(2) << "successfully enqueued async memcpy h2d of " << size << " bytes"
           << " on stream " << stream;
+  LOG(INFO) << "successfully enqueued async memcpy h2d of " << size << " bytes"
+            << " on stream " << stream;
+
   return true;
 }
 
@@ -1234,6 +1257,7 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
                                                     uint64 size,
                                                     CUstream stream) {
   ScopedActivateContext activation(context);
+  LOG(INFO) << "start enqueued async memcpy d2d of " << size << " bytes";
   CUresult result = cuMemcpyDtoDAsync(gpu_dst, gpu_src, size, stream);
   if (result != CUDA_SUCCESS) {
     LOG(ERROR) << port::Printf(
@@ -1251,6 +1275,8 @@ CUDADriver::ContextGetSharedMemConfig(CudaContext* context) {
     return false;
   }
   VLOG(2) << "successfully enqueued async memcpy d2d of " << size << " bytes";
+  LOG(INFO) << "successfully enqueued async memcpy d2d of " << size << " bytes";
+
   return true;
 }
 
